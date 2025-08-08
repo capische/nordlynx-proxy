@@ -56,15 +56,9 @@ RUN if [[ -n "${aptcacher}" ]]; then echo "Acquire::http::Proxy \"http://${aptca
     gpg-wks-server gpgconf gpgsm libassuan0 libksba8 libsqlite3-0 lsb-base pinentry-curses \
     && if [[ ${WG} != false ]]; then apt-get -o Dpkg::Options::="--force-confold" install -y --no-install-recommends wireguard wireguard-tools; fi \
     && apt-get clean all && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-    #&& wget -nv -t10 -O /tmp/nordrepo.deb  "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn-release/nordvpn-release_1.0.0_all.deb" \
-    #&& apt-get install -qqy --no-install-recommends -f /tmp/nordrepo.deb && apt-get update \
-    #&& apt-get install -qqy --no-install-recommends -y nordvpn="${VERSION}" \
-    #&& apt-get remove -y wget nordvpn-release && find /etc/apt/ -iname "*.list" -exec cat {} \; && echo \
-    #&& addgroup --system vpn && useradd -lNms /usr/bin/bash -u "${NUID:-1000}" -G nordvpn,vpn nordclient \
 RUN mkdir -p /run/nordvpn \
     && sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh) -n -v ${VERSION} \
     && addgroup --system vpn \
-    # && useradd -lNms /usr/bin/bash -u "${NUID:-1000}" -G nordvpn,vpn nordclient \
     && usermod -aG nordvpn,vpn root \
     && apt-get clean all && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && if [[ -f /etc/apt/apt.conf.d/01proxy ]]; then rm /etc/apt/apt.conf.d/01proxy; fi;
@@ -83,6 +77,7 @@ RUN diff /etc/tinyproxy/tinyproxy.conf /etc/tinyproxy.conf.tmpl || true \
     && echo "alias checkvpn='nordvpn status | grep -oP \"(?<=Status: ).*\"'" | tee -a ~/.bashrc \
     && echo "alias gettiny='grep -vP \"(^$|^#)\" /etc/tinyproxy/tinyproxy.conf'" | tee -a ~/.bashrc \
     && echo "alias getdante='grep -vP \"(^$|^#)\" /etc/sockd.conf'" | tee -a ~/.bashrc \
+    && echo "alias log-nordvpnd='tail -f /var/log/nordvpn/daemon.log'" | tee -a ~/.bashrc \
     && echo "alias dltest='curl http://appliwave.testdebit.info/100M.iso -o /dev/null'" | tee -a ~/.bashrc \
     && echo "function getversion(){ apt-get update && apt-get install -y --allow-downgrades nordvpn=\${1:-3.16.9} && supervisorctl start start_vpn; }" | tee -a ~/.bashrc \
     && echo "function showversion(){ apt-cache show nordvpn |grep -oP '(?<=Version: ).+' | sort | awk 'NR==1 {first = \$0} END {print first\" - \"\$0; }'; }" | tee -a ~/.bashrc

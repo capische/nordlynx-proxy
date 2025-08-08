@@ -46,7 +46,6 @@ setup_nordvpn() {
   nordvpn set tray off
   nordvpn set cybersec ${CYBER_SEC:-'off'}
   nordvpn set killswitch ${KILLERSWITCH:-'on'}
-  nordvpn set ipv6 ${IPV6} 2>/dev/null
   #obfuscate only available to openvpn(tcp or udp)
   if [[ ${OBFUSCATE,,} == "on" ]] && [[ ${TECHNOLOGY,,} = 'openvpn' ]]; then
     nordvpn set obfuscate ${OBFUSCATE:-'off'}
